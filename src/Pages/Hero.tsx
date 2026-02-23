@@ -1,239 +1,312 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { CpuChipIcon } from "@heroicons/react/24/outline";
 
-// --- TYPES ---
-interface Point { x: number; y: number; }
-interface LightningBolt {
-  segments: Point[];
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
   opacity: number;
-  width: number;
-  lifeSpeed: number;
+  hue: number;
 }
 
-export default function HeroSection() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
+interface Meteor {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  angle: number;
+  radius: number;
+  orbiting: boolean;
+}
+
+export default function EternalCoreHero() {
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Array of refs to track the position of the 4 menu items
-  const menuItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const coreRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-  const [isEngaged, setIsEngaged] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
+  const [isIgnited, setIsIgnited] = useState(false);
 
-  const activeBolts = useRef<LightningBolt[]>([]);
-  const flashIntensity = useRef(0);
+  const mouse = useRef({ x: 0, y: 0 });
+  const particles = useRef<Particle[]>([]);
+  const meteors = useRef<Meteor[]>([]);
+  const animationFrame = useRef<number | null>(null);
 
-  // --- RESIZE HANDLER ---
+  /* Smooth page fade */
   useEffect(() => {
-    const handleResize = () => {
-      if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
+    gsap.fromTo(
+      containerRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 1.2, ease: "power2.out" }
+    );
   }, []);
 
-  // --- FRACTAL LIGHTNING LOGIC ---
-  const createBoltPath = (start: Point, end: Point, displacement: number): Point[] => {
-    if (displacement < 4) return [start, end];
-    const midX = (start.x + end.x) / 2;
-    const midY = (start.y + end.y) / 2;
-    const jitter = (Math.random() - 0.5) * displacement;
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
-    const len = Math.sqrt(dx * dx + dy * dy);
-    const midPoint = {
-      x: midX + (-(dy / len) * jitter),
-      y: midY + ((dx / len) * jitter)
+  /* Core breathing */
+  useEffect(() => {
+    gsap.to(coreRef.current, {
+      scale: 1.04,
+      duration: 3,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
+  }, []);
+
+  /* Mouse tracking */
+  useEffect(() => {
+    const handleMouse = (e: MouseEvent) => {
+      mouse.current.x = e.clientX;
+      mouse.current.y = e.clientY;
     };
-    return [
-      ...createBoltPath(start, midPoint, displacement / 2),
-      ...createBoltPath(midPoint, end, displacement / 2)
-    ];
-  };
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, []);
 
-  const strikeMenuLink = (index: number) => {
-    const el = menuItemsRef.current[index];
-    if (!el) return;
-
-    const rect = el.getBoundingClientRect();
-    const targetX = rect.left + rect.width / 2;
-    const targetY = rect.top + rect.height / 2;
-
-    // Create the bolt from top to the specific menu item
-    const path = createBoltPath(
-      { x: targetX + (Math.random() * 400 - 200), y: -50 }, 
-      { x: targetX, y: targetY }, 
-      150
-    );
-
-    activeBolts.current.push({
-      segments: path,
-      opacity: 1.2,
-      width: 3,
-      lifeSpeed: 0.04
-    });
-
-    // Visual feedback for the strike
-    flashIntensity.current = 0.7;
-    
-    // Reveal the specific item with a "power-on" glow
-    gsap.to(el, {
-      opacity: 1,
-      y: 0,
-      duration: 0.4,
-      ease: "power4.out",
-      onStart: () => {
-        gsap.fromTo(el, 
-          { filter: "brightness(10) blur(10px)" }, 
-          { filter: "brightness(1) blur(0px)", duration: 1 }
-        );
-      }
-    });
-  };
-
-  const startInitialization = () => {
-    if (isEngaged) return;
-    setIsEngaged(true);
-    audioRef.current?.play();
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsComplete(true);
-        // Reveal the center title last
-        gsap.to(".center-content", { opacity: 1, scale: 1, duration: 1.5, ease: "expo.out" });
-      }
-    });
-
-    // Sequence the 4 strikes
-    [0, 1, 2, 3].forEach((val, i) => {
-      tl.add(() => strikeMenuLink(val), i * 0.7 + 0.5); 
-    });
-  };
-
-  // --- RENDER LOOP ---
+  /* Particle + Meteor Engine */
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    if (!ctx) return;
 
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
 
-      if (flashIntensity.current > 0) {
-        ctx.fillStyle = `rgba(99, 102, 241, ${flashIntensity.current * 0.15})`;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        flashIntensity.current *= 0.88;
-      }
+    resize();
+    window.addEventListener("resize", resize);
 
-      activeBolts.current.forEach((bolt, index) => {
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = "#6366f1";
-        ctx.globalCompositeOperation = "lighter";
+    const cx = () => canvas.width / 2;
+    const cy = () => canvas.height / 2;
+
+    particles.current = Array.from({ length: 280 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.7,
+      vy: (Math.random() - 0.5) * 0.7,
+      size: Math.random() * 2 + 0.8,
+      opacity: Math.random() * 0.4 + 0.2,
+      hue: 210 + Math.random() * 20,
+    }));
+
+    let shockwaveRadius = 0;
+
+    const draw = () => {
+      ctx.fillStyle = "rgba(6, 8, 20, 0.18)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      /* Background particles */
+      particles.current.forEach((p) => {
+        const dx = mouse.current.x - p.x;
+        const dy = mouse.current.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+        p.vx += (dx / dist) * 0.008;
+        p.vy += (dy / dist) * 0.008;
+
+        p.vx += (cx() - p.x) * 0.0004;
+        p.vy += (cy() - p.y) * 0.0004;
+
+        p.vx *= 0.985;
+        p.vy *= 0.985;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = `hsla(${p.hue},40%,60%,${p.opacity})`;
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(255, 255, 255, ${bolt.opacity})`;
-        ctx.lineWidth = bolt.width;
-        
-        if (bolt.segments.length > 0) {
-          ctx.moveTo(bolt.segments[0].x, bolt.segments[0].y);
-          bolt.segments.forEach(p => ctx.lineTo(p.x, p.y));
-        }
-        ctx.stroke();
-        bolt.opacity -= bolt.lifeSpeed;
-        if (bolt.opacity <= 0) activeBolts.current.splice(index, 1);
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
       });
 
-      requestAnimationFrame(render);
+      /* Spawn meteors after ignition */
+      if (isIgnited && Math.random() < 0.25) {
+        const edge = Math.floor(Math.random() * 4);
+        let x = 0;
+        let y = 0;
+
+        if (edge === 0) { x = Math.random() * canvas.width; y = 0; }
+        else if (edge === 1) { x = canvas.width; y = Math.random() * canvas.height; }
+        else if (edge === 2) { x = Math.random() * canvas.width; y = canvas.height; }
+        else { x = 0; y = Math.random() * canvas.height; }
+
+        const angle = Math.atan2(cy() - y, cx() - x);
+
+        meteors.current.push({
+          x,
+          y,
+          vx: Math.cos(angle) * 4,
+          vy: Math.sin(angle) * 4,
+          life: 1,
+          angle: 0,
+          radius: 0,
+          orbiting: false,
+        });
+      }
+
+      /* Meteor logic */
+      meteors.current.forEach((m, i) => {
+        const dx = cx() - m.x;
+        const dy = cy() - m.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (!m.orbiting) {
+          m.vx += dx * 0.0008;
+          m.vy += dy * 0.0008;
+
+          m.x += m.vx;
+          m.y += m.vy;
+
+          if (dist < 150) {
+            m.orbiting = true;
+            m.radius = dist;
+            m.angle = Math.atan2(dy, dx);
+            shockwaveRadius = 10;
+          }
+        } else {
+          m.angle += 0.05;
+          m.radius *= 0.995;
+
+          m.x = cx() + Math.cos(m.angle) * m.radius;
+          m.y = cy() + Math.sin(m.angle) * m.radius;
+
+          if (m.radius < 40) {
+            meteors.current.splice(i, 1);
+          }
+        }
+
+        ctx.save();
+        ctx.globalAlpha = m.life;
+        ctx.strokeStyle = "rgba(180,220,255,0.6)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(m.x - m.vx * 2, m.y - m.vy * 2);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      /* Shockwave */
+      if (shockwaveRadius > 0) {
+        ctx.beginPath();
+        ctx.arc(cx(), cy(), shockwaveRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(150,200,255,${1 - shockwaveRadius / 200})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        shockwaveRadius += 6;
+        if (shockwaveRadius > 200) shockwaveRadius = 0;
+      }
+
+      animationFrame.current = requestAnimationFrame(draw);
     };
-    const raf = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(raf);
-  }, []);
+
+    animationFrame.current = requestAnimationFrame(draw);
+
+    return () => {
+      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, [isIgnited]);
+
+  /* Ignition */
+  const igniteCore = () => {
+    if (isIgnited) return;
+    setIsIgnited(true);
+
+    audioRef.current?.play().catch(() => {});
+
+    gsap.to(coreRef.current, {
+      scale: 2.5,
+      opacity: 0.3,
+      duration: 1,
+      ease: "power3.in",
+    });
+
+    gsap.fromTo(
+      titleRef.current,
+      { opacity: 0, y: 80, scale: 0.7 },
+      { opacity: 1, y: 0, scale: 1, duration: 1.6, ease: "power4.out", delay: 0.5 }
+    );
+
+    gsap.fromTo(
+      navRef.current,
+      { opacity: 0, y: 40 },
+      { opacity: 1, y: 0, duration: 1.4, ease: "power3.out", delay: 1.1 }
+    );
+
+    gsap.to(coreRef.current, {
+      scale: 1.2,
+      opacity: 0.9,
+      duration: 2,
+      ease: "power2.out",
+      delay: 1,
+    });
+  };
 
   return (
-    <section 
+    <section
       ref={containerRef}
-      className="relative flex min-h-screen flex-col items-center justify-center bg-[#050505] overflow-hidden"
+      className="relative min-h-screen bg-[#050814] overflow-hidden flex items-center justify-center"
     >
-      <audio ref={audioRef} src="/horror.mp3" />
-      <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-40 h-full w-full" />
-      
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#050505] to-[#050505]" />
+      <audio ref={audioRef} src="/core-ignition.mp3" preload="auto" />
+      <canvas ref={canvasRef} className="absolute inset-0 z-10 pointer-events-none" />
 
-      <div className="glitch-ui z-20 grid w-full max-w-screen-2xl grid-cols-1 md:grid-cols-3 px-8 md:px-12 items-center">
-        
-        {/* LEFT MENU (Strikes 1 & 2) */}
-        <div className="flex flex-col gap-16 items-center md:items-start order-2 md:order-1 mt-10 md:mt-0">
-          <div ref={el => { menuItemsRef.current[0] = el; }} className="opacity-0 translate-y-10">
-            <MenuLink index="01" label="PROJECTS" sub="Visual Code" />
-          </div>
-          <div ref={el => { menuItemsRef.current[1] = el; }} className="opacity-0 translate-y-10">
-            <MenuLink index="02" label="STACK" sub="Tech Core" />
-          </div>
-        </div>
-
-        {/* CENTER TITLE (Revealed after all strikes) */}
-        <div className="center-content opacity-0 scale-90 flex flex-col items-center text-center py-10 md:py-20 relative order-1 md:order-2">
-          <h1 className="text-[10px] font-bold tracking-[1.5em] text-zinc-600 uppercase mb-8">Neural Engine Active</h1>
-          <h2 className="text-6xl md:text-8xl lg:text-7xl font-black italic text-white tracking-tighter leading-[0.85] relative z-10">
-            FRONT END <br /> <span className="stroke-text text-transparent text-6xl md:text-8xl lg:text-9xl">DEVELOPER</span>
-          </h2>
-          <div className="mt-12 h-[1px] w-48 bg-zinc-900 relative overflow-hidden">
-            <div className={`h-full bg-white transition-all duration-[2s] ${isComplete ? 'w-full' : 'w-0'}`} />
-          </div>
-        </div>
-
-        {/* RIGHT MENU (Strikes 3 & 4) */}
-        <div className="flex flex-col gap-16 items-center md:items-end order-3 mt-10 md:mt-0">
-          <div ref={el => { menuItemsRef.current[2] = el; }} className="opacity-0 translate-y-10">
-            <MenuLink index="03" label="ABOUT" sub="The Logic" />
-          </div>
-          <div ref={el => { menuItemsRef.current[3] = el; }} className="opacity-0 translate-y-10">
-            <MenuLink index="04" label="SIGNAL" sub="Secure Line" />
-          </div>
+      <div
+        ref={coreRef}
+        onClick={igniteCore}
+        className="relative z-30 w-44 h-44 md:w-56 md:h-56 rounded-full cursor-pointer"
+        style={{
+          background:
+            "radial-gradient(circle at 40% 35%, #e2e8f0 0%, #1e293b 40%, #0f172a 75%, transparent 100%)",
+          boxShadow:
+            "0 0 50px 20px rgba(59,130,246,0.22), 0 0 120px 60px rgba(30,64,175,0.16), inset 0 0 40px rgba(255,255,255,0.2)",
+        }}
+      >
+        <div className="absolute inset-0 flex items-center justify-center">
+          <CpuChipIcon className="w-16 h-16 md:w-20 md:h-20 text-slate-200 opacity-80" />
         </div>
       </div>
 
-      {!isEngaged && (
-        <div 
-          onClick={startInitialization}
-          className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#030305]/95 backdrop-blur-sm cursor-pointer"
-        >
-          <div className="relative group mb-8">
-             <div className="absolute -inset-6 rounded-full bg-indigo-500/20 animate-ping" />
-             <CpuChipIcon className="relative h-16 w-16 text-white" />
-          </div>
-          <p className="text-[11px] tracking-[1em] text-white uppercase animate-pulse">Establish Connection</p>
+      <div ref={titleRef} className="absolute z-40 text-center opacity-0 pointer-events-none">
+        <h1 className="text-[13vw] font-black tracking-[-0.04em] text-slate-200">
+          Rahul Dev
+        </h1>
+        <p className="text-xl md:text-3xl font-light tracking-[0.4em] text-blue-300/70 mt-3">
+          FULL STACK WEB ARCHITECT
+        </p>
+      </div>
+
+      <div ref={navRef} className="absolute bottom-16 z-50 flex gap-8 opacity-0">
+        {["PROJECTS", "STACK", "ABOUT", "CONTACT"].map((label, i) => (
+          <a
+            key={i}
+            href={`#${label.toLowerCase()}`}
+            className="px-6 py-2 text-sm tracking-widest text-blue-200/70 hover:text-white border border-blue-400/10 hover:border-blue-400/40 rounded-full"
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+
+      {!isIgnited && (
+        <div className="absolute bottom-12 z-50 text-blue-300/50 text-sm tracking-[3px]">
+          CLICK TO ENTER
         </div>
       )}
 
-      <div className="absolute bottom-10 w-full flex justify-between px-8 md:px-16 text-[8px] font-mono tracking-widest text-zinc-800 uppercase">
-        <span>Impact_OS: v4.0.1</span>
-        <span>©2024_RRRR</span>
-      </div>
-
-      <style>{`
-        .stroke-text { -webkit-text-stroke: 1px rgba(255,255,255,0.7); }
-        .glitch-ui { will-change: filter, transform; }
-      `}</style>
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_45%,rgba(0,0,0,0.65)_100%)]" />
     </section>
-  );
-}
-
-function MenuLink({ index, label, sub }: { index: string, label: string; sub: string }) {
-  return (
-    <div className="group cursor-pointer flex flex-col items-center md:items-start">
-      <div className="flex items-center gap-3">
-        <span className="text-[10px] font-mono text-indigo-500/50 group-hover:text-indigo-400">{index}</span>
-        <h3 className="text-4xl md:text-5xl lg:text-6xl font-extralight tracking-tighter text-white/40 group-hover:text-white transition-all duration-500 ease-out">
-          {label}
-        </h3>
-      </div>
-      <p className="text-[9px] tracking-[0.4em] text-zinc-700 mt-2 uppercase transition-colors group-hover:text-indigo-400/80">// {sub}</p>
-    </div>
   );
 }
