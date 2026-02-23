@@ -22,21 +22,30 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8">
           
           {/* LEFT: THE CALL TO ACTION */}
-          <div className="md:col-span-6 space-y-8">
-            <h3 className="text-5xl md:text-7xl font-light tracking-tighter leading-[0.9]">
-              HAVE A <span className="italic font-serif text-indigo-500">Vision?</span> <br />
-              LETS SYNC.
+        <div className="lg:col-span-7 space-y-10">
+            <h3 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-[0.92] md:leading-[0.9]">
+              Got a <span className="font-serif italic text-indigo-400">vision</span>?<br />
+              Let’s make it real.
             </h3>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <a 
-                href="mailto:your@email.com" 
-                className="group flex items-center justify-between px-8 py-5 bg-white text-black rounded-full font-bold transition-all hover:bg-indigo-500 hover:text-white"
+
+            <div className="flex flex-col sm:flex-row gap-5 pt-6">
+              <a
+                href="mailto:rahul@example.com"
+                className="group relative inline-flex items-center justify-center gap-3 px-8 py-5.5 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-semibold rounded-full overflow-hidden shadow-lg shadow-indigo-950/30 hover:shadow-indigo-900/50 transition-all duration-400 hover:scale-[1.02] active:scale-95"
               >
-                START A PROJECT <ArrowUpRight className="ml-4 group-hover:rotate-45 transition-transform" />
+                <span className="relative z-10 flex items-center gap-2.5">
+                  START PROJECT
+                  <ArrowUpRight className="transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110" size={18} />
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-indigo-400/30 to-transparent opacity-0 group-hover:opacity-40 transition-opacity duration-500" />
               </a>
-              <div className="flex items-center gap-2 px-6 py-5 border border-white/10 rounded-full backdrop-blur-md">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs font-mono tracking-widest text-zinc-400">AVAILABILITY: Q1 2026</span>
+
+              <div className="inline-flex items-center gap-3 px-7 py-5.5 border border-white/8 rounded-full backdrop-blur-xl bg-white/2 text-sm font-mono tracking-wide text-zinc-400">
+                <div className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-40"></span>
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                </div>
+                AVAILABLE — Q2 2026
               </div>
             </div>
           </div>
@@ -48,7 +57,7 @@ export default function Footer() {
               <ul className="space-y-4">
                 {quickLinks.map((link) => (
                   <li key={link}>
-                    <a href={`#${link.toLowerCase().replace(" ", "")}`} className="text-sm font-medium text-zinc-400 hover:text-white transition-colors hover:underline underline-offset-8">
+                    <a href={`#${link.toLowerCase().replace(" ", "")}`} className="text-sm font-medium text-zinc-400   transition-colors hover:underline underline-offset-8">
                       {link}
                     </a>
                   </li>
