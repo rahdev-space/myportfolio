@@ -270,7 +270,7 @@ export default function ControlledTechChaos() {
       />
 
       {/* Projects */}
-      <div className="relative z-10 w-full max-w-7xl mt-20 sm:mt-28 md:mt-32">
+      <div className="relative z-10 w-full max-w-7xl  sm:mt-28 md:mt-32 sm:mb-20">
         <h2
           className="
             text-[12vw]

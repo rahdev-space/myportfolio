@@ -4,7 +4,7 @@ export default function Footer() {
   const socialLinks = [
     { name: "LI", href: "https://www.linkedin.com/in/rahul-dev-516906225/", icon: <Linkedin size={18} /> },
     { name: "TW", href: "https://x.com/rdev01431", icon: <Twitter size={18} /> },
-    { name: "GH", href: "https://github.com/rdev014", icon: <Github size={18} /> },
+    { name: "GH", href: "https://github.com/rahdev-space", icon: <Github size={18} /> },
   ];
 
   const quickLinks = ["About", "Projects", "Tech Specs", "Contact"];
