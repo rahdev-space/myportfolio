@@ -6,7 +6,6 @@ import {
   CpuChipIcon, 
   GlobeAltIcon, 
   BoltIcon, 
-  ArrowTopRightOnSquareIcon,
   DocumentDuplicateIcon 
 } from "@heroicons/react/24/outline";
 
@@ -59,7 +58,7 @@ export default function About() {
               System Architecture
             </div>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
-              Forging <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">Digital Reality</span>
+              Code<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300"> Scale Excellence</span>
             </h2>
           </div>
           <p className="max-w-md text-zinc-400 text-sm leading-relaxed">
@@ -86,18 +85,18 @@ export default function About() {
                 </p>
                 <p className="text-zinc-400 leading-7 mt-4">
                   Today, I architect scalable frontend systems using 
-                  <span className="text-indigo-300"> Next.js</span>, 
-                  <span className="text-indigo-300"> TypeScript</span>, and 
-                  <span className="text-indigo-300"> GSAP</span>. 
+                  <span className="text-indigo-300"> React.js</span>, 
+                  <span className="text-indigo-300"> Express.js</span>, and 
+                  <span className="text-indigo-300"> MongoDB</span>. 
                   I don't just write code; I craft the invisible logic that makes interfaces feel alive.
                 </p>
               </div>
 
               <div className="mt-8 flex gap-3">
-                <TechBadge label="React 18" />
-                <TechBadge label="Next.js" />
-                <TechBadge label="WebGL" />
-                <TechBadge label="Node" />
+                <TechBadge label="React.js" />
+                <TechBadge label="Node.js" />
+                <TechBadge label="Express.js" />
+                <TechBadge label="MongoDB" />
               </div>
             </div>
           </SpotlightCard>
@@ -106,12 +105,12 @@ export default function About() {
           <SpotlightCard className="bento-item md:col-span-2 lg:col-span-4">
             <div className="p-6 flex flex-col items-center justify-center h-full text-center">
               <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600">
-                4+
+                1+
               </div>
               <div className="text-xs uppercase tracking-[0.2em] text-zinc-500 mt-2">Years Experience</div>
               <div className="w-full h-px bg-zinc-800 my-4" />
               <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-600">
-                30+
+                10+
               </div>
               <div className="text-xs uppercase tracking-[0.2em] text-zinc-500 mt-2">Projects Deployed</div>
             </div>
@@ -126,7 +125,7 @@ export default function About() {
                   <DocumentDuplicateIcon className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
                 </div>
                 <div className="text-xl md:text-2xl font-mono text-white group-hover:text-indigo-300 transition-colors truncate">
-                  hello@example.com
+                  jorgjack40@gmail.com
                 </div>
                 <div className="mt-2 text-xs text-indigo-500/50 group-hover:text-indigo-400 transition-colors">
                   // Click to copy address
@@ -176,16 +175,16 @@ export default function About() {
                  <div className="flex items-start justify-between">
                     <div>
                       <div className="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">Current Focus</div>
-                      <h4 className="text-lg font-medium text-white">WebGL & Shaders</h4>
+                      <h4 className="text-lg font-medium text-white">React.js | Production Systems</h4>
                     </div>
                     <BoltIcon className="w-5 h-5 text-yellow-500 animate-pulse" />
                  </div>
                  <p className="text-zinc-400 text-sm mt-4">
-                    Pushing the browser to its limits with Three.js and custom GLSL shaders to create immersive 3D web experiences.
+                    Building scalable, high-performance web applications using the MERN stack, delivering seamless full-stack solutions from intuitive frontends to robust backend architectures.
                  </p>
                  <div className="mt-4 flex items-center text-xs text-white/50 gap-1 group cursor-pointer hover:text-white transition-colors">
-                    <span>View Experiments</span>
-                    <ArrowTopRightOnSquareIcon className="w-3 h-3" />
+                    {/* <span>View Experiments</span>
+                    <ArrowTopRightOnSquareIcon className="w-3 h-3" /> */}
                  </div>
               </div>
            </SpotlightCard>
@@ -282,7 +281,7 @@ function SpotlightCard({
       <div className="relative h-full">{children}</div>
     </div>
   );
-}
+} 
 
 const STACK = [
   { name: "Next.js", icon: "https://cdn.simpleicons.org/nextdotjs/ffffff" },
@@ -291,8 +290,6 @@ const STACK = [
   { name: "Tailwind", icon: "https://cdn.simpleicons.org/tailwindcss/38BDF8" },
   { name: "GSAP", icon: "https://cdn.simpleicons.org/greensock/88CE02" },
   { name: "Node.js", icon: "https://cdn.simpleicons.org/nodedotjs/5FA04E" },
-  { name: "PostgreSQL", icon: "https://cdn.simpleicons.org/postgresql/4169E1" },
-  { name: "AWS", icon: "https://cdn.simpleicons.org/amazonaws/232F3E" },
   { name: "Figma", icon: "https://cdn.simpleicons.org/figma/F24E1E" },
   { name: "Docker", icon: "https://cdn.simpleicons.org/docker/2496ED" },
 ];
