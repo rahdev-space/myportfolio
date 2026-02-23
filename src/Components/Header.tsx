@@ -1,14 +1,10 @@
 import { ArrowUpRightIcon } from "@heroicons/react/16/solid";
 import { useState, useEffect } from "react";
 
-const navigation = [
-  { name: "About", href: "about", code: "01" },
-  { name: "Projects", href: "projects", code: "02" },
-  { name: "Tech Specs", href: "tech", code: "03" },
-];
+
 
 export default function Header() {
-  const [current, setCurrent] = useState("#");
+  
   const [scrolled, setScrolled] = useState(false);
 
   // Detect scroll to add "active" state to header background
@@ -20,7 +16,6 @@ export default function Header() {
 
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    setCurrent(href);
     const target = href === "#" ? document.body : document.querySelector(href);
     if (target) {
       target.scrollIntoView({ behavior: "smooth" });
@@ -53,33 +48,7 @@ export default function Header() {
             </span>
           </div>
 
-          {/* Center: HUD Navigation */}
-          <div className="hidden md:flex items-center gap-2">
-            {navigation.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => handleScroll(e, item.href)}
-                className={`group relative flex items-center gap-2 px-6 py-2 transition-all duration-300 ${
-                  current === item.href ? "text-white" : "text-zinc-500 hover:text-zinc-300"
-                }`}
-              >
-                {/* Micro-label */}
-                <span className="text-[7px] font-mono opacity-50 group-hover:text-white transition-colors">
-                  {item.code}
-                </span>
-                
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">
-                  {item.name}
-                </span>
-
-                {/* Active Underline Glow */}
-                {current === item.href && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-white shadow-[0_0_10px_white]" />
-                )}
-              </a>
-            ))}
-          </div>
+          
 
           {/* Right: The Signal Button */}
           <div className="flex items-center gap-6">
