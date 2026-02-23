@@ -260,7 +260,7 @@ export default function EternalCoreHero() {
       ref={containerRef}
       className="relative min-h-screen bg-[#050814] overflow-hidden flex items-center justify-center"
     >
-      <audio ref={audioRef} src="/core-ignition.mp3" preload="auto" />
+      <audio ref={audioRef} src="starting.mp3" preload="auto" />
       <canvas ref={canvasRef} className="absolute inset-0 z-10 pointer-events-none" />
 
       <div
@@ -279,9 +279,13 @@ export default function EternalCoreHero() {
         </div>
       </div>
 
-      <div ref={titleRef} className="absolute z-40 text-center opacity-0 pointer-events-none">
-        <h1 className="text-[13vw] font-black tracking-[-0.04em] text-slate-200">
-          Rahul Dev
+        <div
+        ref={titleRef}
+        className="absolute z-40 text-center opacity-0 pointer-events-none"
+      >
+        <h1 className="text-[13vw] md:text-[11vw] lg:text-[9vw] font-black tracking-[-0.04em] leading-none text-slate-200">
+          Rahul DEv
+          
         </h1>
         <p className="text-xl md:text-3xl font-light tracking-[0.4em] text-blue-300/70 mt-3">
           FULL STACK WEB ARCHITECT
